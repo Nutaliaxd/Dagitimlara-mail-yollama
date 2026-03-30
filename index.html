@@ -104,9 +104,7 @@
     background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
     padding: 24px; margin-bottom: 24px;
   }
-  .input-section label { display: block; font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim); margin-bottom: 8px; }
   .input-row { display: flex; gap: 12px; }
-  .input-row + .input-row { margin-top: 12px; }
   .input-row input {
     flex: 1; padding: 12px 16px; background: var(--bg); border: 1px solid var(--border);
     border-radius: 8px; color: var(--text); font-family: var(--mono); font-size: 1rem;
@@ -123,13 +121,6 @@
   .generate-btn:hover { box-shadow: 0 0 20px var(--accent-glow); transform: translateY(-1px); }
   .generate-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
 
-  /* Progress */
-  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 8px; overflow: hidden; display: none; }
-  .progress-bar.visible { display: block; }
-  .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; width: 0%; transition: width 0.3s; }
-  .progress-text { font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim); margin-bottom: 12px; display: none; }
-  .progress-text.visible { display: block; }
-
   /* Log */
   .log {
     background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
@@ -140,7 +131,6 @@
   .log-line.info { color: var(--accent); }
   .log-line.ok { color: var(--green); }
   .log-line.err { color: var(--red); }
-  .log-line.warn { color: var(--yellow); }
 
   /* Output */
   .output-section {
@@ -171,8 +161,59 @@
     padding: 12px 16px; margin-bottom: 24px; line-height: 1.6;
   }
   .note-box.yellow { color: var(--yellow); background: rgba(251,191,36,0.07); border: 1px solid rgba(251,191,36,0.2); }
-  .note-box.orange { color: var(--orange); background: rgba(251,146,60,0.07); border: 1px solid rgba(251,146,60,0.2); }
-  .note-box a { color: inherit; text-decoration: underline; }
+
+  /* Search feature */
+  .search-box {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 24px; margin-bottom: 24px;
+  }
+  .search-box h3 { font-family: var(--mono); font-size: 0.85rem; color: var(--accent); margin-bottom: 14px; }
+  .search-input {
+    width: 100%; padding: 12px 16px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-family: var(--mono); font-size: 1rem;
+    outline: none; transition: border-color 0.2s; margin-bottom: 16px;
+  }
+  .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+  .search-input::placeholder { color: var(--text-dim); }
+
+  .search-stats {
+    font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim);
+    margin-bottom: 12px; display: none;
+  }
+  .search-stats.visible { display: block; }
+
+  .search-results {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  .search-result-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px; border-radius: 8px; margin-bottom: 4px;
+    font-family: var(--mono); font-size: 0.8rem;
+    background: var(--surface2); border: 1px solid transparent;
+    transition: all 0.15s; cursor: pointer;
+  }
+  .search-result-item:hover {
+    border-color: var(--accent); background: var(--accent-dim);
+  }
+  .result-id { color: var(--accent); font-weight: 600; min-width: 80px; }
+  .result-key {
+    color: var(--text-dim); font-size: 0.7rem;
+    max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .result-badge {
+    font-size: 0.65rem; padding: 2px 8px; border-radius: 4px;
+    background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid rgba(52,211,153,0.2);
+    white-space: nowrap;
+  }
+  .result-badge.token {
+    background: rgba(251,191,36,0.1); color: var(--yellow); border-color: rgba(251,191,36,0.2);
+  }
+
+  .no-results {
+    font-family: var(--mono); font-size: 0.8rem; color: var(--text-dim);
+    text-align: center; padding: 24px;
+  }
 
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -183,6 +224,7 @@
     .logo { font-size: 1.5rem; }
     .input-row { flex-direction: column; }
     .upload-btn { min-width: 100%; }
+    .result-key { max-width: 150px; }
   }
 </style>
 </head>
@@ -226,8 +268,8 @@
   </div>
 
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('single')">Tekli Oyun</button>
-    <button class="tab" onclick="switchTab('profile')">Profil Generator</button>
+    <button class="tab active" onclick="switchTab('single')">Lua Generator</button>
+    <button class="tab" onclick="switchTab('search')">Depot Key Arama</button>
   </div>
 
   <!-- Tab 1: Single Game -->
@@ -243,42 +285,29 @@
         <button class="generate-btn" id="generateBtn" disabled onclick="generateSingle()">Generate</button>
       </div>
     </div>
-  </div>
-
-  <!-- Tab 2: Profile Generator -->
-  <div class="tab-content" id="tab-profile">
-    <div class="note-box orange">
-      Steam Web API Key gerekli —
-      <a href="https://steamcommunity.com/dev/apikey" target="_blank">buradan alabilirsiniz</a>.
-      Profil <b>public</b> olmalı. Çok sayıda oyun varsa işlem birkaç dakika sürebilir.
-    </div>
-    <div class="input-section">
-      <label>Steam Web API Key</label>
-      <div class="input-row">
-        <input type="password" id="apiKeyInput" placeholder="Steam Web API Key..." autocomplete="off">
+    <div class="log" id="logPanel"></div>
+    <div class="output-section" id="outputSection">
+      <div class="output-header">
+        <div class="output-title" id="outputTitle">output.lua</div>
+        <div class="output-actions">
+          <button class="action-btn" onclick="copyOutput()">Kopyala</button>
+          <button class="action-btn" onclick="downloadOutput()">İndir</button>
+        </div>
       </div>
-      <div style="height:12px"></div>
-      <label>Steam ID / Profil URL / Vanity Name</label>
-      <div class="input-row">
-        <input type="text" id="steamIdInput" placeholder="76561198xxxxx veya profil URL..." autocomplete="off">
-        <button class="generate-btn" id="profileBtn" disabled onclick="generateProfile()">Generate All</button>
-      </div>
+      <div class="output-code" id="outputCode"></div>
     </div>
   </div>
 
-  <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
-  <div class="progress-text" id="progressText"></div>
-  <div class="log" id="logPanel"></div>
-
-  <div class="output-section" id="outputSection">
-    <div class="output-header">
-      <div class="output-title" id="outputTitle">output.lua</div>
-      <div class="output-actions">
-        <button class="action-btn" onclick="copyOutput()">Kopyala</button>
-        <button class="action-btn" onclick="downloadOutput()">İndir</button>
+  <!-- Tab 2: Depot Key Search -->
+  <div class="tab-content" id="tab-search">
+    <div class="search-box">
+      <h3>// Depot Key & Token Arama</h3>
+      <input type="text" class="search-input" id="searchInput" placeholder="Depot ID veya key ile ara..." autocomplete="off" oninput="doSearch()">
+      <div class="search-stats" id="searchStats"></div>
+      <div class="search-results" id="searchResults">
+        <div class="no-results" id="searchEmpty">JSON dosyalarını yükleyin, ardından arama yapabilirsiniz.</div>
       </div>
     </div>
-    <div class="output-code" id="outputCode"></div>
   </div>
 
 </div>
@@ -286,23 +315,22 @@
 <script>
 const CORS_PROXY = "https://corsproxy.io/?";
 const STEAMCMD_API = "https://api.steamcmd.net/v1/info/";
-const STEAM_API = "https://api.steampowered.com";
 
 let depotKeys = {};
 let accessTokens = {};
 let lastOutput = "";
 let lastFilename = "output.lua";
-let isRunning = false;
 
 const $ = id => document.getElementById(id);
 
 // ===== TABS =====
 function switchTab(tab) {
   document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', (tab === 'single' && i === 0) || (tab === 'profile' && i === 1));
+    t.classList.toggle('active', (tab === 'single' && i === 0) || (tab === 'search' && i === 1));
   });
   $('tab-single').classList.toggle('active', tab === 'single');
-  $('tab-profile').classList.toggle('active', tab === 'profile');
+  $('tab-search').classList.toggle('active', tab === 'search');
+  if (tab === 'search') refreshSearchView();
 }
 
 // ===== LOG =====
@@ -320,15 +348,6 @@ function clearLog() {
   $("logPanel").innerHTML = "";
   $("logPanel").classList.remove("visible");
   $("outputSection").classList.remove("visible");
-  $("progressBar").classList.remove("visible");
-  $("progressText").classList.remove("visible");
-  $("progressFill").style.width = "0%";
-}
-
-function setProgress(pct, text) {
-  $("progressBar").classList.add("visible");
-  $("progressFill").style.width = pct + "%";
-  if (text) { $("progressText").classList.add("visible"); $("progressText").textContent = text; }
 }
 
 // ===== FILE LOADING =====
@@ -353,26 +372,18 @@ function updateStatus() {
   $("depotCount").textContent = dk > 0 ? `(${dk})` : "";
   $("tokenCount").textContent = tk > 0 ? `(${tk})` : "";
   $("generateBtn").disabled = dk === 0;
-  updateProfileBtn();
-}
-
-function updateProfileBtn() {
-  const dk = Object.keys(depotKeys).length;
-  $("profileBtn").disabled = dk === 0 || !$("apiKeyInput").value.trim() || !$("steamIdInput").value.trim() || isRunning;
 }
 
 $("depotFile").addEventListener("change", async e => {
   const f = e.target.files[0]; if (!f) return;
-  try { depotKeys = await loadJSON(f); $("depotLabel").classList.add("loaded"); $("depotLabel").textContent = `✓ depotkeys.json (${Object.keys(depotKeys).length} key)`; updateStatus(); }
+  try { depotKeys = await loadJSON(f); $("depotLabel").classList.add("loaded"); $("depotLabel").textContent = `✓ depotkeys.json (${Object.keys(depotKeys).length} key)`; updateStatus(); refreshSearchView(); }
   catch (err) { alert("depotkeys.json okunamadı: " + err.message); }
 });
 $("tokenFile").addEventListener("change", async e => {
   const f = e.target.files[0]; if (!f) return;
-  try { accessTokens = await loadJSON(f); $("tokenLabel").classList.add("loaded"); $("tokenLabel").textContent = `✓ appaccesstokens.json (${Object.keys(accessTokens).length} token)`; updateStatus(); }
+  try { accessTokens = await loadJSON(f); $("tokenLabel").classList.add("loaded"); $("tokenLabel").textContent = `✓ appaccesstokens.json (${Object.keys(accessTokens).length} token)`; updateStatus(); refreshSearchView(); }
   catch (err) { alert("appaccesstokens.json okunamadı: " + err.message); }
 });
-$("apiKeyInput").addEventListener("input", updateProfileBtn);
-$("steamIdInput").addEventListener("input", updateProfileBtn);
 
 (async () => {
   const dk = await tryAutoLoad("depotkeys.json");
@@ -390,33 +401,7 @@ async function fetchJSON(url) {
   return null;
 }
 
-async function resolveVanityUrl(apiKey, name) {
-  const d = await fetchJSON(`${STEAM_API}/ISteamUser/ResolveVanityURL/v1/?key=${apiKey}&vanityurl=${name}`);
-  return (d && d.response?.success === 1) ? d.response.steamid : null;
-}
-
-async function getOwnedGames(apiKey, steamId) {
-  const d = await fetchJSON(`${STEAM_API}/IPlayerService/GetOwnedGames/v1/?key=${apiKey}&steamid=${steamId}&include_appinfo=1&include_played_free_games=1&format=json`);
-  return (d && d.response) ? (d.response.games || []) : null;
-}
-
-async function parseSteamInput(input, apiKey) {
-  if (input.includes("/id/")) {
-    const v = input.replace(/\/$/, "").split("/id/").pop();
-    log(`[*] Vanity URL çözümleniyor: ${v}`, "info");
-    const id = await resolveVanityUrl(apiKey, v);
-    if (id) log(`[+] Steam ID: ${id}`, "ok");
-    return id;
-  }
-  if (input.includes("/profiles/")) return input.replace(/\/$/, "").split("/profiles/").pop();
-  if (/^\d{17}$/.test(input)) return input;
-  log(`[*] Vanity name olarak deneniyor: ${input}`, "info");
-  const id = await resolveVanityUrl(apiKey, input);
-  if (id) log(`[+] Steam ID: ${id}`, "ok");
-  return id;
-}
-
-// ===== DEPOT LOGIC (shared) =====
+// ===== DEPOT LOGIC =====
 function appendDepotLines(lines, appId, depots) {
   const content = [], shared = [], dlcW = [], dlcWO = [];
   for (const [did, info] of Object.entries(depots)) {
@@ -459,85 +444,6 @@ async function generateSingle() {
   $("generateBtn").disabled = false; $("generateBtn").textContent = "Generate";
 }
 
-// ===== PROFILE =====
-async function generateProfile() {
-  if (isRunning) return;
-  isRunning = true;
-  const apiKey = $("apiKeyInput").value.trim();
-  const steamInput = $("steamIdInput").value.trim();
-  clearLog(); updateProfileBtn();
-
-  const steamId = await parseSteamInput(steamInput, apiKey);
-  if (!steamId) { log("[!] Steam ID çözümlenemedi!", "err"); isRunning = false; updateProfileBtn(); return; }
-
-  log("[*] Oyun listesi çekiliyor...", "info");
-  const games = await getOwnedGames(apiKey, steamId);
-  if (!games || !games.length) { log("[!] Oyun listesi alınamadı! Profil private olabilir.", "err"); isRunning = false; updateProfileBtn(); return; }
-
-  games.sort((a, b) => (a.name || "").toLowerCase().localeCompare((b.name || "").toLowerCase()));
-  log(`[+] ${games.length} oyun bulundu!`, "ok");
-  log("[*] Lua dosyası oluşturuluyor...", "info");
-
-  const allLines = [];
-  let ok = 0;
-  const fails = [];
-
-  for (let i = 0; i < games.length; i++) {
-    const g = games[i], appId = String(g.appid), gn = g.name || "Unknown";
-    const pct = Math.round(((i + 1) / games.length) * 100);
-    setProgress(pct, `[${pct}%] (${i + 1}/${games.length}) ${gn.substring(0, 50)}`);
-
-    const info = await fetchJSON(STEAMCMD_API + appId);
-    if (info && info.status === "success") {
-      const gd = info.data[String(appId)];
-      const name = gd?.common?.name || "Unknown";
-      const depots = gd?.depots || {};
-      const ws = "workshopdepot" in depots;
-      const lines = [];
-      lines.push(`-- ------------------------------------------------------------`);
-      lines.push(`-- ${name} (${appId})`);
-      if (ws) lines.push(`-- Note: This game supports Steam Workshop content`);
-      lines.push(`-- ------------------------------------------------------------`);
-      const mk = depotKeys[String(appId)];
-      lines.push(`-- Main Application`);
-      lines.push(mk ? `addappid(${appId}, 1, "${mk}")` : `addappid(${appId})`);
-      appendDepotLines(lines, appId, depots);
-      allLines.push(...lines, "", "");
-      ok++;
-    } else {
-      fails.push({ appId, gn });
-    }
-    if (i < games.length - 1) await new Promise(r => setTimeout(r, 200));
-  }
-
-  const now = new Date().toISOString().replace("T", " ").substring(0, 19) + " UTC";
-  const header = [
-    `--[[==================================================================`,
-    `  Steam Profile Lua - Generated by LuaForge-Web`,
-    `  Steam ID               : ${steamId}`,
-    `  Generated              : ${now}`,
-    `  Total games in library : ${games.length}`,
-    `  Games with depot keys  : ${ok}`,
-    `  Games without keys     : ${fails.length}`,
-    `==================================================================]]--`, ""
-  ];
-  const footer = [];
-  if (fails.length) {
-    footer.push("", "--[[==================================================================", "  GAMES WITHOUT DEPOT KEYS (not included)", "==================================================================]]--");
-    for (const f of fails) footer.push(`-- ${f.appId}: ${f.gn}`);
-  }
-
-  const full = [...header, ...allLines, ...footer].join("\n");
-  log(`========================================`, "ok");
-  log(`  TAMAMLANDI!`, "ok");
-  log(`  Başarılı: ${ok}/${games.length} oyun`, "ok");
-  log(`  Başarısız: ${fails.length} oyun`, fails.length > 0 ? "warn" : "ok");
-  log(`========================================`, "ok");
-
-  showOutput(`${steamId}_profile.lua`, full);
-  isRunning = false; updateProfileBtn();
-}
-
 // ===== OUTPUT =====
 function showOutput(filename, lua) {
   lastOutput = lua; lastFilename = filename;
@@ -559,8 +465,95 @@ function downloadOutput() {
   a.download = lastFilename; a.click(); URL.revokeObjectURL(a.href);
 }
 
+// ===== SEARCH =====
+function refreshSearchView() {
+  const q = $("searchInput").value.trim();
+  if (q) doSearch();
+  else showAllEntries();
+}
+
+function showAllEntries() {
+  const dk = Object.keys(depotKeys).length;
+  const tk = Object.keys(accessTokens).length;
+  if (dk === 0 && tk === 0) {
+    $("searchResults").innerHTML = '<div class="no-results">JSON dosyalarını yükleyin, ardından arama yapabilirsiniz.</div>';
+    $("searchStats").classList.remove("visible");
+    return;
+  }
+  $("searchStats").classList.add("visible");
+  $("searchStats").textContent = `${dk} depot key, ${tk} access token yüklü — aramaya başlayın`;
+  $("searchResults").innerHTML = '';
+}
+
+function doSearch() {
+  const q = $("searchInput").value.trim().toLowerCase();
+  const dk = Object.keys(depotKeys).length;
+  const tk = Object.keys(accessTokens).length;
+
+  if (dk === 0 && tk === 0) {
+    $("searchResults").innerHTML = '<div class="no-results">Önce JSON dosyalarını yükleyin.</div>';
+    $("searchStats").classList.remove("visible");
+    return;
+  }
+
+  if (!q) { showAllEntries(); return; }
+
+  const results = [];
+
+  // Search depot keys
+  for (const [id, key] of Object.entries(depotKeys)) {
+    if (id.toLowerCase().includes(q) || key.toLowerCase().includes(q)) {
+      results.push({ id, value: key, type: 'depot' });
+    }
+  }
+
+  // Search access tokens
+  for (const [id, token] of Object.entries(accessTokens)) {
+    if (id.toLowerCase().includes(q) || token.toLowerCase().includes(q)) {
+      results.push({ id, value: token, type: 'token' });
+    }
+  }
+
+  $("searchStats").classList.add("visible");
+  $("searchStats").textContent = `${results.length} sonuç bulundu (${q})`;
+
+  if (results.length === 0) {
+    $("searchResults").innerHTML = '<div class="no-results">Sonuç bulunamadı.</div>';
+    return;
+  }
+
+  // Limit display to 100 results
+  const display = results.slice(0, 100);
+  const container = $("searchResults");
+  container.innerHTML = '';
+
+  for (const r of display) {
+    const item = document.createElement("div");
+    item.className = "search-result-item";
+    item.onclick = () => {
+      if (r.type === 'depot') {
+        switchTab('single');
+        $("appIdInput").value = r.id;
+      }
+    };
+    item.innerHTML = `
+      <span class="result-id">${r.id}</span>
+      <span class="result-key" title="${r.value}">${r.value}</span>
+      <span class="result-badge ${r.type === 'token' ? 'token' : ''}">${r.type === 'depot' ? 'depot key' : 'token'}</span>
+    `;
+    container.appendChild(item);
+  }
+
+  if (results.length > 100) {
+    const more = document.createElement("div");
+    more.className = "no-results";
+    more.textContent = `... ve ${results.length - 100} sonuç daha. Aramayı daraltın.`;
+    container.appendChild(more);
+  }
+}
+
+// ===== EVENTS =====
 $("appIdInput").addEventListener("keydown", e => { if (e.key === "Enter") generateSingle(); });
-$("steamIdInput").addEventListener("keydown", e => { if (e.key === "Enter") generateProfile(); });
 </script>
 
 </body>
