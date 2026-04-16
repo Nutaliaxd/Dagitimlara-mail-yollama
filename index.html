@@ -169,9 +169,13 @@
   .gallery-card h2{font-size:16px;margin:0 0 4px;display:flex;align-items:center;gap:8px}
   .gallery-card h2 svg{width:18px;height:18px;fill:var(--text)}
   .gallery-card .sub{color:var(--muted);font-size:13px;margin-bottom:14px}
-  .gallery{display:grid;grid-template-columns:1fr;gap:14px}
-  @media(min-width:520px){ .gallery{grid-template-columns:1fr 1fr} }
-  .post-item{display:block;border:1px solid var(--border);border-radius:10px;overflow:hidden;text-decoration:none;color:var(--text);transition:transform .15s,box-shadow .15s,border-color .15s;background:#fff}
+  .gallery{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;-webkit-overflow-scrolling:touch;scroll-padding-left:2px}
+  .gallery::-webkit-scrollbar{height:6px}
+  .gallery::-webkit-scrollbar-track{background:#f1f3f5;border-radius:3px}
+  .gallery::-webkit-scrollbar-thumb{background:#c1c7cd;border-radius:3px}
+  .gallery::-webkit-scrollbar-thumb:hover{background:#9aa0a6}
+  .post-item{display:block;flex:0 0 200px;scroll-snap-align:start;border:1px solid var(--border);border-radius:10px;overflow:hidden;text-decoration:none;color:var(--text);transition:transform .15s,box-shadow .15s,border-color .15s;background:#fff}
+  @media(min-width:520px){ .post-item{flex:0 0 220px} }
   .post-item:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08);border-color:#b6cdf5}
   .post-img-wrap{position:relative;aspect-ratio:1/1;background:#f1f3f5;overflow:hidden}
   .post-img-wrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
