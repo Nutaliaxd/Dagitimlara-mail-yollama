@@ -420,7 +420,7 @@ const CAMPAIGN = {
 // GitHub auto-gallery ayarları
 const GH_REPO = 'Nutaliaxd/Dagitimlara-mail-yollama';
 const GH_PATH = 'images';
-const GH_CACHE_KEY = 'gh-gallery-cache-v2';
+const GH_CACHE_KEY = 'gh-gallery-cache-v3';
 const GH_CACHE_MS = 10 * 60 * 1000; // 10 dk
 
 // Paylaş ayarları
@@ -467,8 +467,12 @@ const SHARE_TEXT = "The Amazing Digital Circus: The Last Act Türkiye'de vizyona
       showGalleryError('Gösterilecek görsel yok.');
       return;
     }
+    let loadedCount = 0, errorCount = 0;
     posts.forEach((p, i) => {
       const profileUrl = p.postUrl || ('https://x.com/' + p.handle);
+      // Dosya adındaki özel karakterleri URL-safe yap (boşluk, Türkçe karakter vs.)
+      const imgUrl = p.image.split('/').map(encodeURIComponent).join('/');
+
       const link = document.createElement('a');
       link.className = 'post-item';
       link.href = profileUrl;
@@ -476,7 +480,7 @@ const SHARE_TEXT = "The Amazing Digital Circus: The Last Act Türkiye'de vizyona
       link.rel = 'noopener';
       link.innerHTML =
         '<div class="post-img-wrap">' +
-          '<img src="' + esc(p.image) + '" alt="@' + esc(p.handle) + ' tarafından paylaşılan görsel" loading="lazy" />' +
+          '<img alt="@' + esc(p.handle) + ' tarafından paylaşılan görsel" loading="lazy" />' +
         '</div>' +
         '<div class="post-meta">' +
           '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>' +
@@ -486,15 +490,20 @@ const SHARE_TEXT = "The Amazing Digital Circus: The Last Act Türkiye'de vizyona
 
       const img = link.querySelector('img');
       img.addEventListener('error', () => {
+        errorCount++;
+        console.warn('[Galeri] Görsel yüklenemedi:', p.image, '→', imgUrl);
         const wrap = img.parentElement;
         wrap.innerHTML = '<div class="broken">🖼️<br>Görsel yüklenemedi<br><small>' + esc(p.image) + '</small></div>';
       });
+      img.addEventListener('load', () => { loadedCount++; });
+      // src'yi EN SON set et ki error listener tetiklenebilsin
+      img.src = imgUrl;
 
       img.parentElement.style.cursor = 'zoom-in';
       img.parentElement.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        openLightbox(p.image);
+        openLightbox(imgUrl);
         track('gallery_image_click', { handle: p.handle, index: i });
       });
 
@@ -504,6 +513,10 @@ const SHARE_TEXT = "The Amazing Digital Circus: The Last Act Türkiye'de vizyona
 
       gallery.appendChild(link);
     });
+    // 3 saniye sonra yükleme raporu
+    setTimeout(() => {
+      console.log('[Galeri] Rapor:', posts.length, 'kart,', loadedCount, 'yüklendi,', errorCount, 'hata');
+    }, 3000);
   }
 
   function showGalleryError(msg) {
@@ -511,8 +524,9 @@ const SHARE_TEXT = "The Amazing Digital Circus: The Last Act Türkiye'de vizyona
   }
 
   async function loadGallery() {
-    // Eski cache anahtarlarını temizle (v1 gibi)
+    // Eski cache anahtarlarını temizle (v1, v2 gibi)
     try { localStorage.removeItem('gh-gallery-cache-v1'); } catch {}
+    try { localStorage.removeItem('gh-gallery-cache-v2'); } catch {}
 
     // 1) Cache kontrolü
     try {
