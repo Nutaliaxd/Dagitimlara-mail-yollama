@@ -31,13 +31,20 @@
 <meta name="twitter:description" content="The Amazing Digital Circus 9. bölümünün Türkiye sinemalarında yayınlanması için kampanya. Türk dağıtımcılarına tek tıkla mail gönder, imza at, sesini duyur." />
 <meta name="twitter:image" content="https://nutaliaxd.github.io/Dagitimlara-mail-yollama/images/Inhundefender.jpg" />
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-M83292QG9L"></script>
+<!-- Google tag (gtag.js) — deferred until after load to keep TBT low -->
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-M83292QG9L');
+  window.addEventListener('load', function(){
+    setTimeout(function(){
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-M83292QG9L';
+      document.head.appendChild(s);
+    }, 1500);
+  });
 </script>
 
 <style>
@@ -82,7 +89,6 @@
     position:relative;
     overflow:hidden;
     box-shadow:0 4px 20px rgba(220,38,38,.35);
-    animation:breaking-glow 2.4s ease-in-out infinite;
     contain:paint;
   }
   .breaking-banner:hover{
@@ -92,10 +98,6 @@
   .breaking-banner:active {
     transform: translateY(1px);
     box-shadow:0 2px 12px rgba(251,191,36,.5);
-  }
-  @keyframes breaking-glow{
-    0%,100%{box-shadow:0 4px 20px rgba(220,38,38,.35)}
-    50%{box-shadow:0 4px 28px rgba(251,191,36,.55)}
   }
   .breaking-banner::before{
     content:'';
@@ -109,8 +111,8 @@
     will-change:transform;
   }
   @keyframes breaking-sweep{
-    0%{left:-60%}
-    60%,100%{left:120%}
+    0%{transform:translateX(0) skewX(-20deg)}
+    60%,100%{transform:translateX(400%) skewX(-20deg)}
   }
   .breaking-inner{display:flex;align-items:center;gap:14px;position:relative;z-index:1}
   .breaking-badge{background:#fbbf24;color:#7c2d12;font-weight:800;font-size:12px;padding:5px 10px;border-radius:4px;display:inline-flex;align-items:center;gap:6px;letter-spacing:.6px;flex:0 0 auto;text-transform:uppercase;box-shadow:0 2px 8px rgba(0,0,0,.15)}
@@ -801,7 +803,18 @@ const SHARE_TEXT = "The Amazing Digital Circus: The Last Act Türkiye'de vizyona
     if (e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
   });
 
-  loadGallery();
+  // Gallery'yi kritik yoldan çıkar — kart viewport'a yaklaşınca yükle
+  if ('IntersectionObserver' in window && galleryCard) {
+    const galleryIO = new IntersectionObserver((entries, obs) => {
+      if (entries[0].isIntersecting) {
+        loadGallery();
+        obs.disconnect();
+      }
+    }, { rootMargin: '200px 0px' });
+    galleryIO.observe(galleryCard);
+  } else {
+    loadGallery();
+  }
 
 
   // ---------- Paylaş butonları (native share destekli) ----------
