@@ -83,6 +83,7 @@
     overflow:hidden;
     box-shadow:0 4px 20px rgba(220,38,38,.35);
     animation:breaking-glow 2.4s ease-in-out infinite;
+    contain:paint;
   }
   .breaking-banner:hover{
     transform:translateY(-1px);
@@ -105,6 +106,7 @@
     transform:skewX(-20deg);
     animation:breaking-sweep 3.5s infinite;
     pointer-events:none;
+    will-change:transform;
   }
   @keyframes breaking-sweep{
     0%{left:-60%}
@@ -128,8 +130,8 @@
   .change-icon{flex:0 0 40px;width:40px;height:40px;border-radius:50%;background:var(--change);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700}
   .change-text{flex:1;min-width:0} /* min-width:200px kaldırıldı */
   .change-text b{display:block;color:var(--change);margin-bottom:2px}
-  .change-text span{color:var(--muted);font-size:13px}
-  .change-text .live-count{color:var(--change);font-weight:600}
+  .change-text span{color:#4b5563;font-size:13px}
+  .change-text .live-count{color:var(--change);font-weight:600;display:inline-block;min-width:60px}
   .change-text .live-dot{display:inline-block;width:6px;height:6px;background:var(--change);border-radius:50%;margin-right:4px;vertical-align:middle;animation:pulse 2s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
   .change-btn{background:var(--change);color:#fff;border:none;padding:10px 18px;border-radius:6px;font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background .15s, transform .1s}
@@ -149,8 +151,8 @@
   .x-btn:active{transform:scale(0.97)}
 
   /* Glitch CTA kartı */
-  .glitch-card{background:linear-gradient(135deg,#7c3aed 0%,#c026d3 100%);border-color:#6d28d9;color:#fff;position:relative;overflow:hidden}
-  .glitch-card::before{content:'';position:absolute;top:0;left:-60%;width:45%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);transform:skewX(-20deg);animation:breaking-sweep 4s infinite;pointer-events:none}
+  .glitch-card{background:linear-gradient(135deg,#7c3aed 0%,#c026d3 100%);border-color:#6d28d9;color:#fff;position:relative;overflow:hidden;contain:paint}
+  .glitch-card::before{content:'';position:absolute;top:0;left:-60%;width:45%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);transform:skewX(-20deg);animation:breaking-sweep 4s infinite;pointer-events:none;will-change:transform}
   .glitch-badge{position:absolute;top:10px;right:12px;background:#fbbf24;color:#7c2d12;font-size:12px;font-weight:800;padding:3px 8px;border-radius:4px;letter-spacing:.5px;z-index:1}
   .glitch-inner{display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:relative;z-index:1}
   .glitch-top{display:flex;align-items:flex-start;gap:14px;position:relative;z-index:1;margin-bottom:14px}
@@ -186,8 +188,8 @@
   .share-btn:hover{transform:translateY(-1px)}
   .share-btn:active{transform:scale(0.97)}
   .share-btn svg{width:18px;height:18px;fill:currentColor;flex:0 0 auto}
-  .share-wa{background:#25d366;color:#fff}
-  .share-wa:hover{background:#1fb855}
+  .share-wa{background:#1a7a3a;color:#fff}
+  .share-wa:hover{background:#155b2b}
   .share-x-btn{background:#0f1419;color:#fff}
   .share-x-btn:hover{background:#2a3a4a}
   .share-copy{background:#fff;color:#78350f;border:1px solid #fbbf24}
@@ -198,12 +200,12 @@
   .gallery-card h2{font-size:16px;margin:0 0 4px;display:flex;align-items:center;gap:8px}
   .gallery-card h2 svg{width:18px;height:18px;fill:var(--text)}
   .gallery-card .sub{color:var(--muted);font-size:13px;margin-bottom:14px}
-  .gallery{display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding-bottom:10px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scroll-padding:0 4px}
+  .gallery{display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding-bottom:10px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scroll-padding:0 4px;min-height:280px;contain:layout}
   .gallery::-webkit-scrollbar{height:6px}
   .gallery::-webkit-scrollbar-track{background:#f1f3f5;border-radius:3px}
   .gallery::-webkit-scrollbar-thumb{background:#c1c6cc;border-radius:3px}
   .gallery::-webkit-scrollbar-thumb:hover{background:#a0a6ad}
-  .gallery-loading{color:var(--muted);font-size:13px;text-align:center;padding:20px;font-style:italic;flex:1 0 100%}
+  .gallery-loading{color:var(--muted);font-size:13px;text-align:center;padding:20px;font-style:italic;flex:1 0 100%;display:flex;align-items:center;justify-content:center;min-height:240px}
   .post-item{display:block;border:1px solid var(--border);border-radius:10px;overflow:hidden;text-decoration:none;color:var(--text);transition:transform .15s,box-shadow .15s,border-color .15s;background:#fff;flex:0 0 220px;scroll-snap-align:start}
   @media(max-width:480px){.post-item{flex:0 0 75%}}
   .post-item:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08);border-color:#b6cdf5}
@@ -243,7 +245,7 @@
   .sig-body input:focus{outline:none;border-color:var(--accent)}
   .sig-body .sig-note{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4}
 
-  .list{display:flex;flex-direction:column;gap:8px}
+  .list{display:flex;flex-direction:column;gap:8px;min-height:560px;contain:layout}
   .row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;border:1px solid var(--border);border-radius:8px;background:#fff;transition:background .15s,border-color .15s}
   .row .who{flex:1;min-width:0}
   .row .who .name{font-weight:500;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -639,7 +641,7 @@ const SHARE_TEXT = "The Amazing Digital Circus: The Last Act Türkiye'de vizyona
   if (breakingBanner) breakingBanner.addEventListener('click', () => track('breaking_news_click'));
 
   // ---------- Change.org canlı imza sayısı ----------
-  fetch('signatures.json?t=' + Date.now())
+  fetch('signatures.json')
     .then(r => r.ok ? r.json() : null)
     .then(data => {
       if (data && typeof data.count === 'number') {
@@ -665,6 +667,11 @@ const SHARE_TEXT = "The Amazing Digital Circus: The Last Act Türkiye'de vizyona
     posts.forEach((p, i) => {
       const profileUrl = p.postUrl || ('https://x.com/' + p.handle);
       const imgUrl = p.image.split('/').map(encodeURIComponent).join('/');
+      // Türetilmiş optimize edilmiş WebP yolları (images/optimized/<base>-{480,960}.webp)
+      const base = p.image.replace(/^.*\//, '').replace(/\.[^.]+$/, '');
+      const baseEnc = encodeURIComponent(base);
+      const webp480 = 'images/optimized/' + baseEnc + '-480.webp';
+      const webp960 = 'images/optimized/' + baseEnc + '-960.webp';
 
       const link = document.createElement('a');
       link.className = 'post-item';
@@ -673,7 +680,10 @@ const SHARE_TEXT = "The Amazing Digital Circus: The Last Act Türkiye'de vizyona
       link.rel = 'noopener';
       link.innerHTML =
         '<div class="post-img-wrap">' +
-          '<img alt="@' + esc(p.handle) + ' tarafından paylaşılan görsel" loading="lazy" decoding="async" />' +
+          '<picture>' +
+            '<source type="image/webp" srcset="' + webp480 + ' 480w, ' + webp960 + ' 960w" sizes="(max-width: 480px) 75vw, 220px">' +
+            '<img alt="@' + esc(p.handle) + ' tarafından paylaşılan görsel" loading="lazy" decoding="async" width="220" height="220" />' +
+          '</picture>' +
         '</div>' +
         '<div class="post-meta">' +
           '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>' +
@@ -682,17 +692,19 @@ const SHARE_TEXT = "The Amazing Digital Circus: The Last Act Türkiye'de vizyona
         '</div>';
 
       const img = link.querySelector('img');
+      const picture = link.querySelector('picture');
       img.addEventListener('error', () => {
         errorCount++;
         console.warn('[Galeri] Görsel yüklenemedi:', p.image, '→', imgUrl);
-        const wrap = img.parentElement;
+        const wrap = picture.parentElement;
         wrap.innerHTML = '<div class="broken">🖼️<br>Görsel yüklenemedi<br><small>' + esc(p.image) + '</small></div>';
       });
       img.addEventListener('load', () => { loadedCount++; });
       img.src = imgUrl;
 
-      img.parentElement.style.cursor = 'zoom-in';
-      img.parentElement.addEventListener('click', (e) => {
+      const imgWrap = link.querySelector('.post-img-wrap');
+      imgWrap.style.cursor = 'zoom-in';
+      imgWrap.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         openLightbox(imgUrl);
@@ -897,7 +909,7 @@ const SHARE_TEXT = "The Amazing Digital Circus: The Last Act Türkiye'de vizyona
   const GLITCH_SUBJECT = "Please respond to Turkish distributors — TADC: The Last Act";
   const GLITCH_BTN_LABEL = '📧 Mail Aç';
   let glitchBody = null;
-  fetch('mail-body-glitch.txt?t=' + Date.now())
+  fetch('mail-body-glitch.txt')
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
     .then(text => { glitchBody = text; })
     .catch(err => console.error('mail-body-glitch.txt yüklenemedi:', err));
@@ -954,7 +966,7 @@ const SHARE_TEXT = "The Amazing Digital Circus: The Last Act Türkiye'de vizyona
   const GLITCH_FORM_OPEN_LABEL = '🔗 Contact sayfasını yeni sekmede aç';
 
   let contactFormBody = null;
-  fetch('contact-form-body.txt?t=' + Date.now())
+  fetch('contact-form-body.txt')
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
     .then(text => { contactFormBody = text.trim(); })
     .catch(err => console.error('contact-form-body.txt yüklenemedi:', err));
@@ -1022,7 +1034,7 @@ const SHARE_TEXT = "The Amazing Digital Circus: The Last Act Türkiye'de vizyona
   // ---------- Mail taslağı (mail-body.txt'den) ----------
   let cachedBody = null;
   let bodyLoadError = null;
-  fetch('mail-body.txt?t=' + Date.now())
+  fetch('mail-body.txt')
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
     .then(text => { cachedBody = text; })
     .catch(err => { bodyLoadError = err; console.error('mail-body.txt yüklenemedi:', err); });
@@ -1200,7 +1212,7 @@ const SHARE_TEXT = "The Amazing Digital Circus: The Last Act Türkiye'de vizyona
   });
 
   // ---------- Alıcılar (recipients.txt'den otomatik) ----------
-  fetch('recipients.txt?t=' + Date.now())
+  fetch('recipients.txt')
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
     .then(text => {
       items = text.split('\n')
