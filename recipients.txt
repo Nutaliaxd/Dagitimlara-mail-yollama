@@ -1,4 +1,5 @@
 # email|isim  (satır başı # = yorum, boş satırlar atlanır)
+info@birfilm.com|BirFilm
 tmefilms@tme.com.tr|TME Films
 info@marsfilm.net|Mars Film
 info@bgfilmcilik.com|BG Film
